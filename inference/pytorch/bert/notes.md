@@ -12,8 +12,8 @@ The `serve` directory is the `pytorch/serve` directory. Pulled here since we are
 #### Pull PT 1.11 E3 image
 `sudo docker pull 763104351884.dkr.ecr.us-west-2.amazonaws.com/pytorch-inference:1.11.0-gpu-py38-cu115-ubuntu20.04-e3` 
 
-#### Run Docker Container
-`sudo docker run --name benchmark_bert --gpus=all -v ~/deep-learning-benchmarks/inference/:/inference/ -it 763104351884.dkr.ecr.us-west-2.amazonaws.com/pytorch-inference:1.11.0-gpu-py38-cu115-ubuntu20.04-e3 bash`
+#### Run Docker Container for serving 
+`sudo docker run --name benchmark_server --gpus=all --network=host -v ~/deep-learning-benchmarks/inference/:/inference/ -it 763104351884.dkr.ecr.us-west-2.amazonaws.com/pytorch-inference:1.11.0-gpu-py38-cu115-ubuntu20.04-e3 bash`
 
 #### First step need to install HuggingFace Transformers 
 `conda install -c huggingface transformers -y`
@@ -35,3 +35,9 @@ The `serve` directory is the `pytorch/serve` directory. Pulled here since we are
 `mv serve/examples/Huggingface_Transformers/Seq_classification_artifacts/sample_text_captum_input.txt .`
 
 `torchserve --start --model-store model_store --models my_tc=BERTSeqClassification.mar --ncs` 
+
+#### Run Docker Container for invoking endpoint
+`sudo docker run --name benchmark_client --gpus=all --network=host -v ~/deep-learning-benchmarks/inference/:/inference/ -it 763104351884.dkr.ecr.us-west-2.amazonaws.com/pytorch-inference:1.11.0-gpu-py38-cu115-ubuntu20.04-e3 bash`
+
+#### Perform inference
+`python measure_inference.py --dph <dollar-per-hour>`
