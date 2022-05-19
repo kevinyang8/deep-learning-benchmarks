@@ -1,6 +1,6 @@
-# PT 1.11 E3 BERT Inference Benchmark
+# PT 1.11 E3 Mask-RCNN Inference Benchmark
 
-The `serve` directory is the `pytorch/serve` directory. Pulled here since we are using the BERT model from the `examples` directory there. There is code there to pull the model and create a `.mar` file for `torchserve`.
+The `serve` directory is the `pytorch/serve` directory. Pulled here since we are using the Mask-RCNN model from the `examples` directory there. There is code there to pull the model and create a `.mar` file for `torchserve`.
 
 #### Stop and remove all containers
 `docker stop $(docker ps -a -q)`
@@ -18,31 +18,29 @@ The `serve` directory is the `pytorch/serve` directory. Pulled here since we are
 #### Run Docker Container for serving 
 `sudo docker run --name benchmark_server --gpus=all --network=host -v ~/deep-learning-benchmarks/inference/:/inference/ -it 763104351884.dkr.ecr.us-west-2.amazonaws.com/pytorch-inference:1.11.0-gpu-py38-cu115-ubuntu20.04-e3 bash`
 
+`sudo docker run --name benchmark_server --gpus=all --network=host -v ~/deep-learning-benchmarks/inference/:/inference/ -it pytorch/torchserve:0.5.2-gpu bash`
+
 `sudo docker run --name benchmark_server --network=host -v ~/deep-learning-benchmarks/inference/:/inference/ -it 763104351884.dkr.ecr.us-west-2.amazonaws.com/pytorch-inference:1.11.0-cpu-py38-ubuntu20.04-e3 bash`
 
-#### First step need to install HuggingFace Transformers 
-`conda install -c huggingface transformers -y`
-
-#### Clone pytorch/serve repo and download bert model
+#### Clone pytorch/serve repo and download Mask-RCNN model
 `git clone https://github.com/pytorch/serve.git`
 
-`cd serve/examples/Huggingface_Transformers`
+`wget https://download.pytorch.org/models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth`
 
-`python Download_Transformer_models.py`
+`torch-model-archiver --model-name maskrcnn --version 1.0 --model-file serve/examples/object_detector/maskrcnn/model.py --serialized-file maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth --handler object_detector --extra-files serve/examples/object_detector/index_to_name.json`
 
-`torch-model-archiver --model-name BERTSeqClassification --version 1.0 --serialized-file Transformer_model/pytorch_model.bin --handler ./Transformer_handler_generalized.py --extra-files "Transformer_model/config.json,./setup_config.json,./Seq_classification_artifacts/index_to_name.json"`
-
-#### Move model to model_store dir and start torchserve endpoint
 `mkdir model_store`
 
-`mv serve/examples/Huggingface_Transformers/BERTSeqClassification.mar model_store`
+`mv maskrcnn.mar model_store/`
 
-`mv serve/examples/Huggingface_Transformers/Seq_classification_artifacts/sample_text_captum_input.txt .`
+`mv serve/examples/object_detector/persons.jpg .`
 
-`torchserve --start --model-store model_store --models my_tc=BERTSeqClassification.mar --ncs` 
+`torchserve --start --model-store model_store --models maskrcnn=maskrcnn.mar`
 
 #### Run Docker Container for invoking endpoint
 `sudo docker run --name benchmark_client --gpus=all --network=host -v ~/deep-learning-benchmarks/inference/:/inference/ -it 763104351884.dkr.ecr.us-west-2.amazonaws.com/pytorch-inference:1.11.0-gpu-py38-cu115-ubuntu20.04-e3 bash`
+
+`sudo docker run --name benchmark_client --gpus=all --network=host -v ~/deep-learning-benchmarks/inference/:/inference/ -it pytorch/torchserve:0.5.2-gpu bash`
 
 `sudo docker run --name benchmark_client --network=host -v ~/deep-learning-benchmarks/inference/:/inference/ -it 763104351884.dkr.ecr.us-west-2.amazonaws.com/pytorch-inference:1.11.0-cpu-py38-ubuntu20.04-e3 bash`
 
