@@ -22,6 +22,8 @@ The `serve` directory is the `pytorch/serve` directory. Pulled here since we are
 
 `sudo docker run --name benchmark_server --network=host -v ~/deep-learning-benchmarks/inference/:/inference/ -it 763104351884.dkr.ecr.us-west-2.amazonaws.com/pytorch-inference:1.11.0-cpu-py38-ubuntu20.04-e3 bash`
 
+`sudo docker run --name benchmark_server --network=host -v ~/deep-learning-benchmarks/inference/:/inference/ -it pytorch/torchserve:0.5.2-cpu bash`
+
 #### Clone pytorch/serve repo and download Mask-RCNN model
 `git clone https://github.com/pytorch/serve.git`
 
@@ -35,7 +37,7 @@ The `serve` directory is the `pytorch/serve` directory. Pulled here since we are
 
 `mv serve/examples/object_detector/persons.jpg .`
 
-`torchserve --start --model-store model_store --models maskrcnn=maskrcnn.mar`
+`torchserve --start --model-store model_store --models maskrcnn=maskrcnn.mar --ncs`
 
 #### Run Docker Container for invoking endpoint
 `sudo docker run --name benchmark_client --gpus=all --network=host -v ~/deep-learning-benchmarks/inference/:/inference/ -it 763104351884.dkr.ecr.us-west-2.amazonaws.com/pytorch-inference:1.11.0-gpu-py38-cu115-ubuntu20.04-e3 bash`
@@ -43,6 +45,8 @@ The `serve` directory is the `pytorch/serve` directory. Pulled here since we are
 `sudo docker run --name benchmark_client --gpus=all --network=host -v ~/deep-learning-benchmarks/inference/:/inference/ -it pytorch/torchserve:0.5.2-gpu bash`
 
 `sudo docker run --name benchmark_client --network=host -v ~/deep-learning-benchmarks/inference/:/inference/ -it 763104351884.dkr.ecr.us-west-2.amazonaws.com/pytorch-inference:1.11.0-cpu-py38-ubuntu20.04-e3 bash`
+
+`sudo docker run --name benchmark_client --network=host -v ~/deep-learning-benchmarks/inference/:/inference/ -it pytorch/torchserve:0.5.2-cpu bash`
 
 #### Perform inference
 `python measure_inference.py --dph <dollar-per-hour>`
